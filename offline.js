@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1503088706,
+	"version": 1503090602,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -30,6 +30,7 @@
 		"images/efeito-sheet0.png",
 		"images/efeito-sheet1.png",
 		"images/efeito-sheet2.png",
+		"images/sprite2-sheet0.png",
 		"media/laser.m4a",
 		"media/laser.ogg",
 		"media/engineer.m4a",
@@ -38,6 +39,10 @@
 		"media/gema.ogg",
 		"media/nao.m4a",
 		"media/nao.ogg",
+		"media/pc_ligando.m4a",
+		"media/pc_ligando.ogg",
+		"media/pc.m4a",
+		"media/pc.ogg",
 		"media/menu.m4a",
 		"media/menu.ogg",
 		"freepixel-webfont.eot",
