@@ -1,5 +1,5 @@
 ﻿CACHE MANIFEST
-#1503081845
+#1503088706
 data.js
 c2runtime.js
 jquery-2.1.1.min.js
@@ -21,18 +21,24 @@ images/laser-sheet1.png
 images/energia-sheet0.png
 images/vidro.png
 images/dialog_box.png
+images/gema-sheet0.png
+images/sprite-sheet0.png
+images/spritefont.png
+images/botao-sheet0.png
+images/botao-sheet1.png
+images/efeito-sheet0.png
+images/efeito-sheet1.png
+images/efeito-sheet2.png
 media/laser.m4a
 media/laser.ogg
 media/engineer.m4a
 media/engineer.ogg
+media/gema.m4a
+media/gema.ogg
+media/nao.m4a
+media/nao.ogg
 media/menu.m4a
 media/menu.ogg
-icon-16.png
-icon-32.png
-icon-114.png
-icon-128.png
-icon-256.png
-loading-logo.png
 freepixel-webfont.eot
 freepixel-webfont.svg
 freepixel-webfont.ttf
