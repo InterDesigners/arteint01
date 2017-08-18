@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1503076730,
+	"version": 1503081845,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -26,6 +26,8 @@
 		"media/laser.ogg",
 		"media/engineer.m4a",
 		"media/engineer.ogg",
+		"media/menu.m4a",
+		"media/menu.ogg",
 		"icon-16.png",
 		"icon-32.png",
 		"icon-114.png",
