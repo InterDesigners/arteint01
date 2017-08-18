@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1503035582,
+	"version": 1503076730,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -21,11 +21,22 @@
 		"images/laser-sheet1.png",
 		"images/energia-sheet0.png",
 		"images/vidro.png",
+		"images/dialog_box.png",
+		"media/laser.m4a",
+		"media/laser.ogg",
+		"media/engineer.m4a",
+		"media/engineer.ogg",
 		"icon-16.png",
 		"icon-32.png",
 		"icon-114.png",
 		"icon-128.png",
 		"icon-256.png",
-		"loading-logo.png"
+		"loading-logo.png",
+		"freepixel-webfont.eot",
+		"freepixel-webfont.svg",
+		"freepixel-webfont.ttf",
+		"freepixel-webfont.woff",
+		"freepixel-webfont.woff2",
+		"stylesheet.css"
 	]
 }
