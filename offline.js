@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1503090602,
+	"version": 1503096667,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -23,7 +23,9 @@
 		"images/vidro.png",
 		"images/dialog_box.png",
 		"images/gema-sheet0.png",
-		"images/sprite-sheet0.png",
+		"images/peixoto-sheet0.png",
+		"images/peixoto-sheet1.png",
+		"images/peixoto-sheet2.png",
 		"images/spritefont.png",
 		"images/botao-sheet0.png",
 		"images/botao-sheet1.png",
