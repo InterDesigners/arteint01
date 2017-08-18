@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1503018707,
+	"version": 1503035582,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -19,6 +19,8 @@
 		"images/venti-sheet2.png",
 		"images/laser-sheet0.png",
 		"images/laser-sheet1.png",
+		"images/energia-sheet0.png",
+		"images/vidro.png",
 		"icon-16.png",
 		"icon-32.png",
 		"icon-114.png",

@@ -15141,6 +15141,149 @@ cr.system_object.prototype.loadFromJSON = function (o)
 	};
 })();
 cr.shaders = {};
+cr.shaders["hsladjust"] = {src: ["varying mediump vec2 vTex;",
+"uniform lowp sampler2D samplerFront;",
+"precision mediump float;",
+"uniform float huerotate;",
+"uniform float satadjust;",
+"uniform float lumadjust;",
+"vec3 rgb_to_hsl(vec3 color)",
+"{",
+"vec3 hsl = vec3(0.0, 0.0, 0.0);",
+"float fmin = min(min(color.r, color.g), color.b);",
+"float fmax = max(max(color.r, color.g), color.b);",
+"float delta = fmax - fmin;",
+"hsl.z = (fmax + fmin) / 2.0;",
+"if (delta == 0.0)",
+"{",
+"hsl.x = 0.0;",
+"hsl.y = 0.0;",
+"}",
+"else",
+"{",
+"if (hsl.z < 0.5)",
+"hsl.y = delta / (fmax + fmin);",
+"else",
+"hsl.y = delta / (2.0 - fmax - fmin);",
+"float dR = (((fmax - color.r) / 6.0) + (delta / 2.0)) / delta;",
+"float dG = (((fmax - color.g) / 6.0) + (delta / 2.0)) / delta;",
+"float dB = (((fmax - color.b) / 6.0) + (delta / 2.0)) / delta;",
+"if (color.r == fmax)",
+"hsl.x = dB - dG;",
+"else if (color.g == fmax)",
+"hsl.x = (1.0 / 3.0) + dR - dB;",
+"else if (color.b == fmax)",
+"hsl.x = (2.0 / 3.0) + dG - dR;",
+"if (hsl.x < 0.0)",
+"hsl.x += 1.0;",
+"else if (hsl.x > 1.0)",
+"hsl.x -= 1.0;",
+"}",
+"return hsl;",
+"}",
+"float hue_to_rgb(float f1, float f2, float hue)",
+"{",
+"if (hue < 0.0)",
+"hue += 1.0;",
+"else if (hue > 1.0)",
+"hue -= 1.0;",
+"float ret;",
+"if ((6.0 * hue) < 1.0)",
+"ret = f1 + (f2 - f1) * 6.0 * hue;",
+"else if ((2.0 * hue) < 1.0)",
+"ret = f2;",
+"else if ((3.0 * hue) < 2.0)",
+"ret = f1 + (f2 - f1) * ((2.0 / 3.0) - hue) * 6.0;",
+"else",
+"ret = f1;",
+"return ret;",
+"}",
+"vec3 hsl_to_rgb(vec3 hsl)",
+"{",
+"vec3 rgb = vec3(hsl.z);",
+"if (hsl.y != 0.0)",
+"{",
+"float f2;",
+"if (hsl.z < 0.5)",
+"f2 = hsl.z * (1.0 + hsl.y);",
+"else",
+"f2 = (hsl.z + hsl.y) - (hsl.y * hsl.z);",
+"float f1 = 2.0 * hsl.z - f2;",
+"rgb.r = hue_to_rgb(f1, f2, hsl.x + (1.0 / 3.0));",
+"rgb.g = hue_to_rgb(f1, f2, hsl.x);",
+"rgb.b = hue_to_rgb(f1, f2, hsl.x - (1.0 / 3.0));",
+"}",
+"return rgb;",
+"}",
+"void main(void)",
+"{",
+"vec4 front = texture2D(samplerFront, vTex);",
+"vec3 rgb = rgb_to_hsl(front.rgb) + vec3(huerotate, 0, (lumadjust - 1.0) * front.a);",
+"rgb.y *= satadjust;",
+"rgb = hsl_to_rgb(rgb);",
+"gl_FragColor = vec4(rgb, front.a);",
+"}"
+].join("\n"),
+	extendBoxHorizontal: 0,
+	extendBoxVertical: 0,
+	crossSampling: false,
+	preservesOpaqueness: true,
+	animated: false,
+	parameters: [["huerotate", 0, 1], ["satadjust", 0, 1], ["lumadjust", 0, 1]] }
+cr.shaders["water"] = {src: ["varying mediump vec2 vTex;",
+"uniform lowp sampler2D samplerFront;",
+"precision mediump float;",
+"uniform float seconds;",
+"uniform float pixelWidth;",
+"uniform float pixelHeight;",
+"const float PI = 3.1415926535897932;",
+"uniform float speed;",
+"uniform float speed_x;",
+"uniform float speed_y;",
+"uniform float intensity;",
+"const int steps = 8;",
+"uniform float frequency;",
+"uniform float angle; // better when a prime",
+"uniform float delta;",
+"uniform float intence;",
+"uniform float emboss;",
+"float col(vec2 coord)",
+"{",
+"float delta_theta = 2.0 * PI / angle;",
+"float col = 0.0;",
+"float theta = 0.0;",
+"for (int i = 0; i < steps; i++)",
+"{",
+"vec2 adjc = coord;",
+"theta = delta_theta*float(i);",
+"adjc.x += cos(theta)*seconds*speed + seconds * speed_x;",
+"adjc.y -= sin(theta)*seconds*speed - seconds * speed_y;",
+"col = col + cos( (adjc.x*cos(theta) - adjc.y*sin(theta))*frequency)*intensity;",
+"}",
+"return cos(col);",
+"}",
+"void main(void)",
+"{",
+"vec2 p = vTex, c1 = p, c2 = p;",
+"float cc1 = col(c1);",
+"c2.x += (1.0 / pixelWidth) / delta;",
+"float dx = emboss*(cc1-col(c2))/delta;",
+"c2.x = p.x;",
+"c2.y += (1.0 / pixelHeight) / delta;",
+"float dy = emboss*(cc1-col(c2))/delta;",
+"c1.x += dx;",
+"c1.y = -(c1.y+dy);",
+"float alpha = 1.+dot(dx,dy)*intence;",
+"c1.y = -c1.y;",
+"gl_FragColor = texture2D(samplerFront,c1)*(alpha);",
+"}"
+].join("\n"),
+	extendBoxHorizontal: 25,
+	extendBoxVertical: 25,
+	crossSampling: false,
+	preservesOpaqueness: false,
+	animated: true,
+	parameters: [["speed", 0, 1], ["speed_x", 0, 1], ["speed_y", 0, 1], ["intensity", 0, 0], ["frequency", 0, 0], ["angle", 0, 0], ["delta", 0, 0], ["intence", 0, 0], ["emboss", 0, 1]] }
 ;
 ;
 cr.plugins_.Audio = function(runtime)
@@ -23594,6 +23737,312 @@ cr.behaviors.DragnDrop = function(runtime)
 	function Exps() {};
 	behaviorProto.exps = new Exps();
 }());
+;
+;
+cr.behaviors.Sin = function(runtime)
+{
+	this.runtime = runtime;
+};
+(function ()
+{
+	var behaviorProto = cr.behaviors.Sin.prototype;
+	behaviorProto.Type = function(behavior, objtype)
+	{
+		this.behavior = behavior;
+		this.objtype = objtype;
+		this.runtime = behavior.runtime;
+	};
+	var behtypeProto = behaviorProto.Type.prototype;
+	behtypeProto.onCreate = function()
+	{
+	};
+	behaviorProto.Instance = function(type, inst)
+	{
+		this.type = type;
+		this.behavior = type.behavior;
+		this.inst = inst;				// associated object instance to modify
+		this.runtime = type.runtime;
+		this.i = 0;		// period offset (radians)
+	};
+	var behinstProto = behaviorProto.Instance.prototype;
+	var _2pi = 2 * Math.PI;
+	var _pi_2 = Math.PI / 2;
+	var _3pi_2 = (3 * Math.PI) / 2;
+	behinstProto.onCreate = function()
+	{
+		this.active = (this.properties[0] === 1);
+		this.movement = this.properties[1]; // 0=Horizontal|1=Vertical|2=Size|3=Width|4=Height|5=Angle|6=Opacity|7=Value only
+		this.wave = this.properties[2];		// 0=Sine|1=Triangle|2=Sawtooth|3=Reverse sawtooth|4=Square
+		this.period = this.properties[3];
+		this.period += Math.random() * this.properties[4];								// period random
+		if (this.period === 0)
+			this.i = 0;
+		else
+		{
+			this.i = (this.properties[5] / this.period) * _2pi;								// period offset
+			this.i += ((Math.random() * this.properties[6]) / this.period) * _2pi;			// period offset random
+		}
+		this.mag = this.properties[7];													// magnitude
+		this.mag += Math.random() * this.properties[8];									// magnitude random
+		this.initialValue = 0;
+		this.initialValue2 = 0;
+		this.ratio = 0;
+		this.init();
+	};
+	behinstProto.saveToJSON = function ()
+	{
+		return {
+			"i": this.i,
+			"a": this.active,
+			"mv": this.movement,
+			"w": this.wave,
+			"p": this.period,
+			"mag": this.mag,
+			"iv": this.initialValue,
+			"iv2": this.initialValue2,
+			"r": this.ratio,
+			"lkv": this.lastKnownValue,
+			"lkv2": this.lastKnownValue2
+		};
+	};
+	behinstProto.loadFromJSON = function (o)
+	{
+		this.i = o["i"];
+		this.active = o["a"];
+		this.movement = o["mv"];
+		this.wave = o["w"];
+		this.period = o["p"];
+		this.mag = o["mag"];
+		this.initialValue = o["iv"];
+		this.initialValue2 = o["iv2"] || 0;
+		this.ratio = o["r"];
+		this.lastKnownValue = o["lkv"];
+		this.lastKnownValue2 = o["lkv2"] || 0;
+	};
+	behinstProto.init = function ()
+	{
+		switch (this.movement) {
+		case 0:		// horizontal
+			this.initialValue = this.inst.x;
+			break;
+		case 1:		// vertical
+			this.initialValue = this.inst.y;
+			break;
+		case 2:		// size
+			this.initialValue = this.inst.width;
+			this.ratio = this.inst.height / this.inst.width;
+			break;
+		case 3:		// width
+			this.initialValue = this.inst.width;
+			break;
+		case 4:		// height
+			this.initialValue = this.inst.height;
+			break;
+		case 5:		// angle
+			this.initialValue = this.inst.angle;
+			this.mag = cr.to_radians(this.mag);		// convert magnitude from degrees to radians
+			break;
+		case 6:		// opacity
+			this.initialValue = this.inst.opacity;
+			break;
+		case 7:
+			this.initialValue = 0;
+			break;
+		case 8:		// forwards/backwards
+			this.initialValue = this.inst.x;
+			this.initialValue2 = this.inst.y;
+			break;
+		default:
+;
+		}
+		this.lastKnownValue = this.initialValue;
+		this.lastKnownValue2 = this.initialValue2;
+	};
+	behinstProto.waveFunc = function (x)
+	{
+		x = x % _2pi;
+		switch (this.wave) {
+		case 0:		// sine
+			return Math.sin(x);
+		case 1:		// triangle
+			if (x <= _pi_2)
+				return x / _pi_2;
+			else if (x <= _3pi_2)
+				return 1 - (2 * (x - _pi_2) / Math.PI);
+			else
+				return (x - _3pi_2) / _pi_2 - 1;
+		case 2:		// sawtooth
+			return 2 * x / _2pi - 1;
+		case 3:		// reverse sawtooth
+			return -2 * x / _2pi + 1;
+		case 4:		// square
+			return x < Math.PI ? -1 : 1;
+		};
+		return 0;
+	};
+	behinstProto.tick = function ()
+	{
+		var dt = this.runtime.getDt(this.inst);
+		if (!this.active || dt === 0)
+			return;
+		if (this.period === 0)
+			this.i = 0;
+		else
+		{
+			this.i += (dt / this.period) * _2pi;
+			this.i = this.i % _2pi;
+		}
+		this.updateFromPhase();
+	};
+	behinstProto.updateFromPhase = function ()
+	{
+		switch (this.movement) {
+		case 0:		// horizontal
+			if (this.inst.x !== this.lastKnownValue)
+				this.initialValue += this.inst.x - this.lastKnownValue;
+			this.inst.x = this.initialValue + this.waveFunc(this.i) * this.mag;
+			this.lastKnownValue = this.inst.x;
+			break;
+		case 1:		// vertical
+			if (this.inst.y !== this.lastKnownValue)
+				this.initialValue += this.inst.y - this.lastKnownValue;
+			this.inst.y = this.initialValue + this.waveFunc(this.i) * this.mag;
+			this.lastKnownValue = this.inst.y;
+			break;
+		case 2:		// size
+			this.inst.width = this.initialValue + this.waveFunc(this.i) * this.mag;
+			this.inst.height = this.inst.width * this.ratio;
+			break;
+		case 3:		// width
+			this.inst.width = this.initialValue + this.waveFunc(this.i) * this.mag;
+			break;
+		case 4:		// height
+			this.inst.height = this.initialValue + this.waveFunc(this.i) * this.mag;
+			break;
+		case 5:		// angle
+			if (this.inst.angle !== this.lastKnownValue)
+				this.initialValue = cr.clamp_angle(this.initialValue + (this.inst.angle - this.lastKnownValue));
+			this.inst.angle = cr.clamp_angle(this.initialValue + this.waveFunc(this.i) * this.mag);
+			this.lastKnownValue = this.inst.angle;
+			break;
+		case 6:		// opacity
+			this.inst.opacity = this.initialValue + (this.waveFunc(this.i) * this.mag) / 100;
+			if (this.inst.opacity < 0)
+				this.inst.opacity = 0;
+			else if (this.inst.opacity > 1)
+				this.inst.opacity = 1;
+			break;
+		case 8:		// forwards/backwards
+			if (this.inst.x !== this.lastKnownValue)
+				this.initialValue += this.inst.x - this.lastKnownValue;
+			if (this.inst.y !== this.lastKnownValue2)
+				this.initialValue2 += this.inst.y - this.lastKnownValue2;
+			this.inst.x = this.initialValue + Math.cos(this.inst.angle) * this.waveFunc(this.i) * this.mag;
+			this.inst.y = this.initialValue2 + Math.sin(this.inst.angle) * this.waveFunc(this.i) * this.mag;
+			this.lastKnownValue = this.inst.x;
+			this.lastKnownValue2 = this.inst.y;
+			break;
+		}
+		this.inst.set_bbox_changed();
+	};
+	behinstProto.onSpriteFrameChanged = function (prev_frame, next_frame)
+	{
+		switch (this.movement) {
+		case 2:	// size
+			this.initialValue *= (next_frame.width / prev_frame.width);
+			this.ratio = next_frame.height / next_frame.width;
+			break;
+		case 3:	// width
+			this.initialValue *= (next_frame.width / prev_frame.width);
+			break;
+		case 4:	// height
+			this.initialValue *= (next_frame.height / prev_frame.height);
+			break;
+		}
+	};
+	function Cnds() {};
+	Cnds.prototype.IsActive = function ()
+	{
+		return this.active;
+	};
+	Cnds.prototype.CompareMovement = function (m)
+	{
+		return this.movement === m;
+	};
+	Cnds.prototype.ComparePeriod = function (cmp, v)
+	{
+		return cr.do_cmp(this.period, cmp, v);
+	};
+	Cnds.prototype.CompareMagnitude = function (cmp, v)
+	{
+		if (this.movement === 5)
+			return cr.do_cmp(this.mag, cmp, cr.to_radians(v));
+		else
+			return cr.do_cmp(this.mag, cmp, v);
+	};
+	Cnds.prototype.CompareWave = function (w)
+	{
+		return this.wave === w;
+	};
+	behaviorProto.cnds = new Cnds();
+	function Acts() {};
+	Acts.prototype.SetActive = function (a)
+	{
+		this.active = (a === 1);
+	};
+	Acts.prototype.SetPeriod = function (x)
+	{
+		this.period = x;
+	};
+	Acts.prototype.SetMagnitude = function (x)
+	{
+		this.mag = x;
+		if (this.movement === 5)	// angle
+			this.mag = cr.to_radians(this.mag);
+	};
+	Acts.prototype.SetMovement = function (m)
+	{
+		if (this.movement === 5)
+			this.mag = cr.to_degrees(this.mag);
+		this.movement = m;
+		this.init();
+	};
+	Acts.prototype.SetWave = function (w)
+	{
+		this.wave = w;
+	};
+	Acts.prototype.SetPhase = function (x)
+	{
+		this.i = (x * _2pi) % _2pi;
+		this.updateFromPhase();
+	};
+	Acts.prototype.UpdateInitialState = function ()
+	{
+		this.init();
+	};
+	behaviorProto.acts = new Acts();
+	function Exps() {};
+	Exps.prototype.CyclePosition = function (ret)
+	{
+		ret.set_float(this.i / _2pi);
+	};
+	Exps.prototype.Period = function (ret)
+	{
+		ret.set_float(this.period);
+	};
+	Exps.prototype.Magnitude = function (ret)
+	{
+		if (this.movement === 5)	// angle
+			ret.set_float(cr.to_degrees(this.mag));
+		else
+			ret.set_float(this.mag);
+	};
+	Exps.prototype.Value = function (ret)
+	{
+		ret.set_float(this.waveFunc(this.i) * this.mag);
+	};
+	behaviorProto.exps = new Exps();
+}());
 cr.getObjectRefTable = function () { return [
 	cr.plugins_.Audio,
 	cr.plugins_.Browser,
@@ -23606,25 +24055,30 @@ cr.getObjectRefTable = function () { return [
 	cr.plugins_.Touch,
 	cr.plugins_.TiledBg,
 	cr.behaviors.DragnDrop,
+	cr.behaviors.Sin,
 	cr.system_object.prototype.cnds.OnLayoutStart,
 	cr.plugins_.Sprite.prototype.acts.SetAnimFrame,
 	cr.system_object.prototype.exps.random,
 	cr.plugins_.Sprite.prototype.acts.SetMirrored,
 	cr.plugins_.Sprite.prototype.acts.SetAnim,
+	cr.behaviors.DragnDrop.prototype.acts.SetEnabled,
 	cr.system_object.prototype.acts.Wait,
+	cr.system_object.prototype.cnds.IsGroupActive,
+	cr.plugins_.Sprite.prototype.cnds.OnCreated,
+	cr.plugins_.Touch.prototype.cnds.OnTouchObject,
+	cr.plugins_.Sprite.prototype.cnds.OnAnimFinished,
+	cr.plugins_.Function.prototype.acts.CallFunction,
 	cr.plugins_.Function.prototype.cnds.OnFunction,
+	cr.plugins_.Touch.prototype.cnds.IsInTouch,
+	cr.plugins_.Sprite.prototype.acts.SetAnimSpeed,
+	cr.system_object.prototype.cnds.EveryTick,
+	cr.plugins_.Sprite.prototype.acts.SetPosToObject,
+	cr.plugins_.TiledBg.prototype.acts.SetPosToObject,
+	cr.system_object.prototype.cnds.Every,
 	cr.plugins_.Sprite.prototype.acts.SetPos,
 	cr.plugins_.Sprite.prototype.exps.X,
 	cr.plugins_.Sprite.prototype.exps.Y,
-	cr.plugins_.Function.prototype.acts.CallFunction,
-	cr.plugins_.Sprite.prototype.cnds.OnCreated,
-	cr.plugins_.Touch.prototype.cnds.OnTouchObject,
 	cr.plugins_.Sprite.prototype.cnds.CompareX,
-	cr.behaviors.DragnDrop.prototype.acts.SetEnabled,
-	cr.plugins_.Sprite.prototype.acts.SetX,
-	cr.system_object.prototype.cnds.EveryTick,
-	cr.plugins_.Sprite.prototype.acts.SetPosToObject,
-	cr.plugins_.Touch.prototype.cnds.IsInTouch,
-	cr.plugins_.Sprite.prototype.acts.SetAnimSpeed
+	cr.plugins_.Sprite.prototype.acts.SetX
 ];};
 
