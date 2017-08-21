@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1503168709,
+	"version": 1503340625,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -33,6 +33,9 @@
 		"images/efeito-sheet1.png",
 		"images/efeito-sheet2.png",
 		"images/sprite2-sheet0.png",
+		"images/sprite-sheet0.png",
+		"images/pcfundo-sheet0.png",
+		"images/maos-sheet0.png",
 		"media/laser.m4a",
 		"media/laser.ogg",
 		"media/engineer.m4a",
