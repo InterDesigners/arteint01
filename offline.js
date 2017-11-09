@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1503340625,
+	"version": 1510251303,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -36,6 +36,14 @@
 		"images/sprite-sheet0.png",
 		"images/pcfundo-sheet0.png",
 		"images/maos-sheet0.png",
+		"images/setal-sheet0.png",
+		"images/setal-sheet1.png",
+		"images/setar-sheet0.png",
+		"images/setar-sheet1.png",
+		"images/full-sheet0.png",
+		"images/full-sheet1.png",
+		"images/sound-sheet0.png",
+		"images/sound-sheet1.png",
 		"media/laser.m4a",
 		"media/laser.ogg",
 		"media/engineer.m4a",
